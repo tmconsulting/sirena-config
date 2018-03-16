@@ -1,7 +1,11 @@
 package config
 
 import (
+	"errors"
+	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/jinzhu/configor"
@@ -35,4 +39,55 @@ func Get() *Config {
 		}
 	})
 	return config
+}
+
+// GetSirenaAddr return sirena address to connect client to
+func (config *Config) GetSirenaAddr() string {
+	if config == nil {
+		return ""
+	}
+	if config.SirenaPort == "" {
+		return config.SirenaHost
+	}
+	return config.SirenaHost + ":" + config.SirenaPort
+}
+
+// GetKeyFile returns contents of key file
+func (config *Config) GetKeyFile(keyFile string) ([]byte, error) {
+	keyDirs := []string{
+		os.Getenv("GOPATH"),
+		binaryDir() + "/keys",
+	}
+	for _, keyDir := range keyDirs {
+		exists, err := pathExists(keyDir + "/" + keyFile)
+		if err != nil {
+			log.Print(err)
+		}
+		if !exists {
+			continue
+		}
+		return ioutil.ReadFile(keyDir + "/" + keyFile)
+	}
+	return nil, errors.New("No key files found")
+}
+
+// binaryDir returns path where binary was run from
+func binaryDir() string {
+	ex, err := os.Executable()
+	if err != nil {
+		return ""
+	}
+	return filepath.Dir(ex)
+}
+
+// pathExists checks if file or dir exist
+func pathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }
