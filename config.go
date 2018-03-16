@@ -1,7 +1,7 @@
 package config
 
 import (
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -52,13 +52,16 @@ func (config *Config) GetSirenaAddr() string {
 	return config.SirenaHost + ":" + config.SirenaPort
 }
 
+// KeyDirs is a list of directories to search Sirena key files in
+var KeyDirs = []string{
+	os.Getenv("GOPATH"),
+	binaryDir() + "/keys",
+	pwdDir() + "/sirena-agent-go/keys",
+}
+
 // GetKeyFile returns contents of key file
 func (config *Config) GetKeyFile(keyFile string) ([]byte, error) {
-	keyDirs := []string{
-		os.Getenv("GOPATH"),
-		binaryDir() + "/keys",
-	}
-	for _, keyDir := range keyDirs {
+	for _, keyDir := range KeyDirs {
 		exists, err := pathExists(keyDir + "/" + keyFile)
 		if err != nil {
 			log.Print(err)
@@ -68,12 +71,21 @@ func (config *Config) GetKeyFile(keyFile string) ([]byte, error) {
 		}
 		return ioutil.ReadFile(keyDir + "/" + keyFile)
 	}
-	return nil, errors.New("No key files found")
+	return nil, fmt.Errorf("No key file %s found", keyFile)
 }
 
 // binaryDir returns path where binary was run from
 func binaryDir() string {
 	ex, err := os.Executable()
+	if err != nil {
+		return ""
+	}
+	return filepath.Dir(ex)
+}
+
+// pwdDir returns pwd dir
+func pwdDir() string {
+	ex, err := os.Getwd()
 	if err != nil {
 		return ""
 	}
