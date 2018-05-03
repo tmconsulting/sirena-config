@@ -23,6 +23,8 @@ type Config struct {
 	ClientPrivateKey         string `yaml:"client_private_key" env:"CLIENT_PRIVATE_KEY" required:"true"`
 	ClientPrivateKeyPassword string `yaml:"client_private_key_password" env:"CLIENT_PRIVATE_KEY_PASSWORD"`
 	ServerPublicKey          string `yaml:"server_public_key" env:"CLIENT_PUBLIC_KEY" required:"true"`
+	RedisHost                string `yaml:"redis_host" env:"REDIS_HOST" required:"true"`
+	RedisPort                string `yaml:"redis_port" env:"REDIS_PORT" required:"true"`
 	EnvType                  string
 }
 
