@@ -6,41 +6,91 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"sync"
 
-	"github.com/jinzhu/configor"
+	"github.com/imdario/mergo"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Config is a config :)
 type Config struct {
-	LogLevel                 string `yaml:"log_level" env:"LOG_LEVEL" default:"debug"` // log everything by default
-	Addr                     string `yaml:"addr" env:"SSM_ADDR" required:"true"`
-	TrackXML                 bool   `yaml:"track_xml" env:"TRACK_XML"`
-	SirenaClientID           string `yaml:"sirena_client_id" env:"SIRENA_CLIENT_ID" required:"true"`
-	SirenaHost               string `yaml:"sirena_host" env:"SIRENA_HOST" required:"true"`
-	SirenaPort               string `yaml:"sirena_port" env:"SIRENA_PORT" required:"true"`
-	ClientPublicKey          string `yaml:"client_public_key" env:"CLIENT_PUBLIC_KEY" required:"true"`
-	ClientPrivateKey         string `yaml:"client_private_key" env:"CLIENT_PRIVATE_KEY" required:"true"`
-	ClientPrivateKeyPassword string `yaml:"client_private_key_password" env:"CLIENT_PRIVATE_KEY_PASSWORD"`
-	ServerPublicKey          string `yaml:"server_public_key" env:"CLIENT_PUBLIC_KEY" required:"true"`
-	RedisHost                string `yaml:"redis_host" env:"REDIS_HOST" required:"true"`
-	RedisPort                string `yaml:"redis_port" env:"REDIS_PORT" required:"true"`
-	EnvType                  string
+	LogLevel                 string `yaml:"log_level,omitempty"`
+	Addr                     string `yaml:"addr,omitempty"`
+	TrackXML                 bool   `yaml:"track_xml,omitempty"`
+	SirenaClientID           string `yaml:"sirena_client_id,omitempty"`
+	SirenaHost               string `yaml:"sirena_host,omitempty"`
+	SirenaPort               string `yaml:"sirena_port,omitempty"`
+	ClientPublicKey          string `yaml:"client_public_key,omitempty"`
+	ClientPrivateKey         string `yaml:"client_private_key,omitempty"`
+	ClientPrivateKeyPassword string `yaml:"client_private_key_password,omitempty"`
+	ServerPublicKey          string `yaml:"server_public_key,omitempty"`
+	RedisHost                string `yaml:"redis_host,omitempty"`
+	RedisPort                string `yaml:"redis_port,omitempty"`
 }
 
-var config = &Config{}
+// CNFG is a Config singletone
+var CNFG *Config
 
-// Singleton guard
-var once sync.Once
+func init() {
+	loadConfig()
+}
 
-// Get reads config from environment or JSON
+// Get returns config
 func Get() *Config {
-	once.Do(func() {
-		if err := configor.New(&configor.Config{Debug: true}).Load(config, "config/config.yaml"); err != nil {
+	return CNFG
+}
+
+// getEnv return env variable or default value provided
+func getEnv(name, defaultVal string) string {
+	val := os.Getenv("name")
+	if val != "" {
+		return val
+	}
+	return defaultVal
+}
+
+// loadConfig loads config from YAML files
+func loadConfig() *Config {
+	configPath := getEnv("CONFIG_PATH", "config")
+	stage := getEnv("STAGE", "development")
+
+	yamlFileList := []string{}
+	err := filepath.Walk(configPath, func(path string, f os.FileInfo, err error) error {
+		if f.IsDir() {
+			return nil
+		}
+		if filepath.Ext(path) != ".yaml" {
+			return nil
+		}
+		yamlFileList = append(yamlFileList, path)
+		return nil
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	loadedConfigs := map[string]Config{}
+	for _, yamlFilePath := range yamlFileList {
+		yamlFileBytes, err := ioutil.ReadFile(yamlFilePath)
+		if err != nil {
 			log.Fatal(err)
 		}
-	})
-	return config
+		fileConfig := map[string]Config{}
+		err = yaml.Unmarshal(yamlFileBytes, &fileConfig)
+		if err != nil {
+			log.Fatal(err)
+		}
+		mergo.Merge(&loadedConfigs, fileConfig)
+	}
+	if _, ok := loadedConfigs[stage]; !ok {
+		d := loadedConfigs["defaults"]
+		return &d
+	}
+	if defaultConfig, ok := loadedConfigs["defaults"]; ok {
+		CNFG = &defaultConfig
+	}
+	mergo.Merge(CNFG, loadedConfigs[stage], mergo.WithOverride)
+
+	return CNFG
 }
 
 // GetSirenaAddr return sirena address to connect client to
