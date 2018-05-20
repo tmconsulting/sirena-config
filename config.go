@@ -26,6 +26,7 @@ type Config struct {
 	RedisHost                string `yaml:"redis_host,omitempty"`
 	RedisPort                string `yaml:"redis_port,omitempty"`
 	RedisPassword            string `yaml:"redis_password,omitempty"`
+	RedisDB                  string `yaml:"redis_db,omitempty"`
 }
 
 // CNFG is a Config singletone
