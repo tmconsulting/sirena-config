@@ -33,7 +33,7 @@ type Config struct {
 var CNFG *Config
 
 func init() {
-	loadConfig()
+	CNFG = loadConfig()
 }
 
 // Get returns config
@@ -77,13 +77,13 @@ func loadConfig() *Config {
 		log.Fatal(err)
 	}
 
-	loadedConfigs := map[string]*Config{}
+	loadedConfigs := map[string]Config{}
 	for _, yamlFilePath := range yamlFileList {
 		yamlFileBytes, err := ioutil.ReadFile(yamlFilePath)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fileConfig := map[string]*Config{}
+		fileConfig := map[string]Config{}
 		err = yaml.Unmarshal(yamlFileBytes, fileConfig)
 		if err != nil {
 			log.Fatal(err)
@@ -91,19 +91,18 @@ func loadConfig() *Config {
 		mergo.Merge(&loadedConfigs, fileConfig)
 	}
 
-	if _, ok := loadedConfigs[stage]; !ok {
-		d := loadedConfigs["defaults"]
-		if d == nil {
+	_, stageExists := loadedConfigs[stage]
+	defaultConfig, defaultExists := loadedConfigs["defaults"]
+	if !stageExists {
+		if !defaultExists {
 			panic(`No "defaults" config found`)
 		}
-		return d
+		return &defaultConfig
 	}
-	if defaultConfig, ok := loadedConfigs["defaults"]; ok {
-		CNFG = defaultConfig
-	}
-	mergo.Merge(CNFG, loadedConfigs[stage], mergo.WithOverride)
+	CONFIG := defaultConfig
+	mergo.Merge(&CONFIG, loadedConfigs[stage], mergo.WithOverride)
 
-	return CNFG
+	return &CONFIG
 }
 
 // GetSirenaAddr return sirena address to connect client to
