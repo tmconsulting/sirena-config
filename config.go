@@ -43,7 +43,7 @@ func Get() *Config {
 
 // getEnv return env variable or default value provided
 func getEnv(name, defaultVal string) string {
-	val := os.Getenv("name")
+	val := os.Getenv(name)
 	if val != "" {
 		return val
 	}
