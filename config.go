@@ -55,6 +55,9 @@ func loadConfig() *Config {
 	configPath := getEnv("CONFIG_PATH", "config")
 	stage := getEnv("STAGE", "development")
 
+	fmt.Printf("Config path: %s\n", configPath)
+	fmt.Printf("Stage: %s\n", stage)
+
 	yamlFileList := []string{}
 	err := filepath.Walk(configPath, func(path string, f os.FileInfo, err error) error {
 		if err != nil {
