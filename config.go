@@ -62,7 +62,7 @@ func loadConfig() *Config {
 	err := filepath.Walk(configPath, func(path string, f os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("Error accessing a path %q: %v\n", configPath, err)
-			return err
+			return nil
 		}
 		if f.IsDir() {
 			return nil
@@ -77,25 +77,29 @@ func loadConfig() *Config {
 		log.Fatal(err)
 	}
 
-	loadedConfigs := map[string]Config{}
+	loadedConfigs := map[string]*Config{}
 	for _, yamlFilePath := range yamlFileList {
 		yamlFileBytes, err := ioutil.ReadFile(yamlFilePath)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fileConfig := map[string]Config{}
-		err = yaml.Unmarshal(yamlFileBytes, &fileConfig)
+		fileConfig := map[string]*Config{}
+		err = yaml.Unmarshal(yamlFileBytes, fileConfig)
 		if err != nil {
 			log.Fatal(err)
 		}
 		mergo.Merge(&loadedConfigs, fileConfig)
 	}
+
 	if _, ok := loadedConfigs[stage]; !ok {
 		d := loadedConfigs["defaults"]
-		return &d
+		if d == nil {
+			panic(`No "defaults" config found`)
+		}
+		return d
 	}
 	if defaultConfig, ok := loadedConfigs["defaults"]; ok {
-		CNFG = &defaultConfig
+		CNFG = defaultConfig
 	}
 	mergo.Merge(CNFG, loadedConfigs[stage], mergo.WithOverride)
 
