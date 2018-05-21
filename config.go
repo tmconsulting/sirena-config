@@ -57,6 +57,10 @@ func loadConfig() *Config {
 
 	yamlFileList := []string{}
 	err := filepath.Walk(configPath, func(path string, f os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Printf("Error accessing a path %q: %v\n", configPath, err)
+			return err
+		}
 		if f.IsDir() {
 			return nil
 		}
