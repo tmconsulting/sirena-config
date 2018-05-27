@@ -5,6 +5,8 @@ defaults:
     sirena_port: 34323
     redis_host: 127.0.0.1
     redis_port: 6379
+    redis_password:
+    redis_db:
     client_public_key: Client.Public.key.pem
     client_private_key: Client.Private.key.pem
     client_private_key_password:
