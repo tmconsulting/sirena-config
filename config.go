@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/imdario/mergo"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -70,6 +71,7 @@ func loadConfig() *Config {
 		if filepath.Ext(path) != ".yaml" {
 			return nil
 		}
+		fmt.Printf("Found YAML file %s\n", path)
 		yamlFileList = append(yamlFileList, path)
 		return nil
 	})
@@ -79,7 +81,9 @@ func loadConfig() *Config {
 
 	loadedConfigs := map[string]Config{}
 	for _, yamlFilePath := range yamlFileList {
+		fmt.Printf("Processing YAML file %s\n", yamlFilePath)
 		yamlFileBytes, err := ioutil.ReadFile(yamlFilePath)
+		fmt.Printf("%s contents:\n%s\n", yamlFilePath, yamlFileBytes)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -91,9 +95,13 @@ func loadConfig() *Config {
 		mergo.Merge(&loadedConfigs, fileConfig)
 	}
 
+	fmt.Println("Loaded configs:")
+	spew.Dump(loadedConfigs)
+
 	_, stageExists := loadedConfigs[stage]
 	defaultConfig, defaultExists := loadedConfigs["defaults"]
 	if !stageExists {
+		fmt.Printf("Stage %s doesn't exist. Using default config", stage)
 		if !defaultExists {
 			panic(`No "defaults" config found`)
 		}
