@@ -130,7 +130,7 @@ var KeyDirs = []string{
 	os.Getenv("GOPATH"),
 	binaryDir() + "/keys",
 	pwdDir() + "/sirena-agent-go/keys",
-	pwdDir() + "/sirena-keys-manager/keys",
+	pwdDir() + "/sirena-proxy/keys",
 }
 
 // GetKeyFile returns contents of key file
