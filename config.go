@@ -12,23 +12,41 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-// Config is a config :)
+// Config is a main Sirena agent config
 type Config struct {
-	LogLevel                 string `yaml:"log_level,omitempty"`
-	Addr                     string `yaml:"addr,omitempty"`
-	TrackXML                 bool   `yaml:"track_xml,omitempty"`
-	SirenaClientID           string `yaml:"sirena_client_id,omitempty"`
-	SirenaHost               string `yaml:"sirena_host,omitempty"`
-	SirenaPort               string `yaml:"sirena_port,omitempty"`
-	ClientPublicKey          string `yaml:"client_public_key,omitempty"`
-	ClientPrivateKey         string `yaml:"client_private_key,omitempty"`
-	ClientPrivateKeyPassword string `yaml:"client_private_key_password,omitempty"`
-	ServerPublicKey          string `yaml:"server_public_key,omitempty"`
-	RedisHost                string `yaml:"redis_host,omitempty"`
-	RedisPort                string `yaml:"redis_port,omitempty"`
-	RedisPassword            string `yaml:"redis_password,omitempty"`
-	RedisDB                  int    `yaml:"redis_db,omitempty"`
-	SirenaProxyURL           string `yaml:"sirena_proxy_url,omitempty"`
+	LogLevel                 string        `yaml:"log_level,omitempty"`
+	Addr                     string        `yaml:"addr,omitempty"`
+	TrackXML                 bool          `yaml:"track_xml,omitempty"`
+	SirenaClientID           string        `yaml:"sirena_client_id,omitempty"`
+	SirenaHost               string        `yaml:"sirena_host,omitempty"`
+	SirenaPort               string        `yaml:"sirena_port,omitempty"`
+	ClientPublicKey          string        `yaml:"client_public_key,omitempty"`
+	ClientPrivateKey         string        `yaml:"client_private_key,omitempty"`
+	ClientPrivateKeyPassword string        `yaml:"client_private_key_password,omitempty"`
+	ServerPublicKey          string        `yaml:"server_public_key,omitempty"`
+	RedisHost                string        `yaml:"redis_host,omitempty"`
+	RedisPort                string        `yaml:"redis_port,omitempty"`
+	RedisPassword            string        `yaml:"redis_password,omitempty"`
+	RedisDB                  int           `yaml:"redis_db,omitempty"`
+	SirenaProxyURL           string        `yaml:"sirena_proxy_url,omitempty"`
+	PubSubConfig             PubSubConfig  `yaml:"pubsub,omitempty"`
+	FormatsConfig            FormatsConfig `yaml:"formats,omitempty"`
+}
+
+// PubSubConfig is a config for external pub/sub logging
+type PubSubConfig struct {
+	Host         string `yaml:"host"`
+	ProjectID    string `yaml:"project_id"`
+	Topic        string `yaml:"topic"`
+	Subscription string `yaml:"subscription"`
+	Key          string `yaml:"key"`
+}
+
+// formatsConfig is a config with date/time formats for external pub/sub logging
+type FormatsConfig struct {
+	Time    string `yaml:"time"`
+	Date    string `yaml:"date"`
+	XmlDate string `yaml:"xml_date"`
 }
 
 // CNFG is a Config singletone
@@ -176,4 +194,12 @@ func pathExists(path string) (bool, error) {
 		return false, nil
 	}
 	return true, err
+}
+
+func GetPubSubConfig() PubSubConfig {
+	return CNFG.PubSubConfig
+}
+
+func GetFormatDateTime() string {
+	return CNFG.FormatsConfig.Time
 }
