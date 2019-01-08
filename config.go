@@ -31,6 +31,8 @@ type Config struct {
 	SirenaProxyURL           string        `yaml:"sirena_proxy_url,omitempty"`
 	PubSubConfig             PubSubConfig  `yaml:"pubsub,omitempty"`
 	FormatsConfig            FormatsConfig `yaml:"formats,omitempty"`
+	SentryLogging            bool          `yaml:"sentry_logging,omitempty"`
+	SentryDSN                string        `yaml:"sentry_dsn,omitempty"`
 }
 
 // PubSubConfig is a config for external pub/sub logging
