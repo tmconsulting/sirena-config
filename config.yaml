@@ -11,5 +11,5 @@ defaults:
     client_private_key: Client.Private.key.pem
     client_private_key_password:
     server_public_key: Server.Public.key.pem
-    sentry_logging: true
+    sentry_enable: true
     sentry_dsn: https://7b00887b8296433ab7154351f96de934:2282c9518e334de489f167bb3bc10d05@sentry.io/1364864

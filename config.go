@@ -31,7 +31,7 @@ type Config struct {
 	SirenaProxyURL           string        `yaml:"sirena_proxy_url,omitempty"`
 	PubSubConfig             PubSubConfig  `yaml:"pubsub,omitempty"`
 	FormatsConfig            FormatsConfig `yaml:"formats,omitempty"`
-	SentryLogging            bool          `yaml:"sentry_logging,omitempty"`
+	SentryEnable             bool          `yaml:"sentry_enable,omitempty"`
 	SentryDSN                string        `yaml:"sentry_dsn,omitempty"`
 }
 
