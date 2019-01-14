@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/imdario/mergo"
@@ -37,11 +38,12 @@ type Config struct {
 
 // PubSubConfig is a config for external pub/sub logging
 type PubSubConfig struct {
-	Host         string `yaml:"host"`
-	ProjectID    string `yaml:"project_id"`
-	Topic        string `yaml:"topic"`
-	Subscription string `yaml:"subscription"`
-	Key          string `yaml:"key"`
+	Host         string        `yaml:"host"`
+	ProjectID    string        `yaml:"project_id"`
+	Topic        string        `yaml:"topic"`
+	Subscription string        `yaml:"subscription"`
+	Key          string        `yaml:"key"`
+	Timeout      time.Duration `yaml:"timeout"`
 }
 
 // formatsConfig is a config with date/time formats for external pub/sub logging
